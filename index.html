@@ -512,12 +512,11 @@ function spinProblemWheel() {
   const spins = 360 * 10;
   const targetDeg = -(targetIndex * segmentAngle);
 
+  totalProblemRotation += spins + targetOffset;
+
   // reset transition dulu (PENTING)
   problemWheelEl.style.transition = 'none';
   problemWheelEl.getBoundingClientRect(); // force reflow
-
-  // set rotasi baru (ABSOLUT, bukan +=)
-  totalProblemRotation = spins + targetDeg;
 
   problemWheelEl.style.transition =
     'transform 7s cubic-bezier(0.1, 0.9, 0.2, 1)';
