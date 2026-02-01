@@ -532,27 +532,6 @@ function spinProblemWheel() {
   }, 7000);
 }
 
-  const index = Math.floor(Math.random() * 12);
-
-  // 🔥 SELALU TAMBAH PUTARAN BARU
-  const extraSpin = 360 * 10; // 10 putaran penuh
-  const targetRotation = -30 * index;
-
-  totalProblemRotation += extraSpin + targetRotation;
-
-  problemWheelEl.style.transition =
-    'transform 7s cubic-bezier(0.1, 0.9, 0.2, 1)';
-
-  problemWheelEl.style.transform =
-    `translate(-50%, -50%) rotate(${totalProblemRotation}deg)`;
-
-  // Update soal setelah animasi selesai
-  setTimeout(() => {
-    currentProblem = problems[index];
-    problemLabelEl.textContent = currentProblem.problem;
-    problemWheelEl.style.transition = 'none';
-  }, 7000);
-}
 
 
 function updateEquation() {
