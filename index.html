@@ -505,18 +505,13 @@ function spinProblemWheel() {
   const segmentAngle = 30;
   const segmentCount = problems.length;
 
-  // pilih target index (0–11)
   const targetIndex = Math.floor(Math.random() * segmentCount);
 
-  // 10 putaran penuh + offset ke target
   const spins = 360 * 10;
   const targetDeg = -(targetIndex * segmentAngle);
 
-  totalProblemRotation += spins + targetOffset;
-
-  // reset transition dulu (PENTING)
-  problemWheelEl.style.transition = 'none';
-  problemWheelEl.getBoundingClientRect(); // force reflow
+  // 🔥 JANGAN reset transition & JANGAN reset rotasi
+  totalProblemRotation += spins + targetDeg;
 
   problemWheelEl.style.transition =
     'transform 7s cubic-bezier(0.1, 0.9, 0.2, 1)';
@@ -524,12 +519,12 @@ function spinProblemWheel() {
   problemWheelEl.style.transform =
     `translate(-50%, -50%) rotate(${totalProblemRotation}deg)`;
 
-  // sinkronisasi SETELAH animasi
   setTimeout(() => {
     currentProblem = problems[targetIndex];
     problemLabelEl.textContent = currentProblem.problem;
   }, 7000);
 }
+
 
 
 
