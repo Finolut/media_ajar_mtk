@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Permainan Matematika Roda Berputar</title>
+  <style>
+body {
+  margin: 0;
+  min-height: 100vh;
+
+background-image: url("img/bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  font-family: sans-serif;
+}   
+
+    h1 {
+      font-size: 1.875rem; /* text-3xl */
+      font-weight: bold;
+      color: #1e40af; /* text-blue-800 */
+      margin-bottom: 2rem;
+    }
+
+    .wheel-container {
+      position: relative;
+      width: 34rem; /* w-64 */
+      height: 30rem; /* h-64 */
+    }
+
+    .wheel {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transition: none;
+    }
+
+    .wheel-container.left {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.wheel-container.right {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+    .segment {
+      position: absolute;
+      width: 11rem; /* w-16 */
+      height: 7rem; /* h-16 */
+      border-radius: 9999px; /* rounded-full */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 2.8rem; /* text-lg */
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+.center-face {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 17rem;
+  height: 17rem;
+
+  background-image: url("img/face.png");
+  background-size: cover;        /* 🔥 penuh tanpa distorsi */
+  background-position: center;   /* 🔥 fokus tengah */
+  background-repeat: no-repeat;
+
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+
+.game-area {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  height: 420px;
+}
+
+.center-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+
+  background: rgba(255, 255, 255, 0.25);
+  border: 10px solid #1e40af;;
+  border-radius: 1rem;
+  padding: 1.5rem 2.5rem;
+  min-width: 300px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.center-controls {
+  position: absolute;
+  top: calc(50% + 90px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+
+
+    .center-box h2 {
+      font-size: 2.25rem; /* text-4xl */
+      font-weight: bold;
+      color: #1e40af; /* text-blue-800 */
+      margin-bottom: 0.5rem;
+    }
+
+    .feedback.correct {
+      color: #059669; /* text-green-600 */
+      font-weight: bold;
+      font-size: 1.5rem; /* text-2xl */
+      margin-top: 0.5rem;
+      min-height: 2rem;
+    }
+
+    .feedback.wrong {
+      color: #dc2626; /* text-red-600 */
+      font-weight: bold;
+      font-size: 1.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .spin-btn {
+      margin-top: 1rem;
+      background-color: #2563eb; /* bg-blue-600 */
+      color: white;
+      border: none;
+      padding: 1rem 2.4rem; /* px-6 py-2 */
+      border-radius: 9999px; /* rounded-full */
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      transform: translateY(50px);
+    }
+
+    .spin-btn:hover {
+      background-color: #1d4ed8; /* hover:bg-blue-700 */
+    }
+
+    .instructions {
+      margin-top: 3rem;
+      text-align: center;
+      color: #374151; /* text-gray-700 */
+      max-width: 32rem; /* max-w-md */
+    }
+
+    .draggable {
+      cursor: grab;
+    }
+
+    .draggable:active {
+      cursor: grabbing;
+    }
+
+    .problem-label {
+  position: absolute;
+  top: calc(50% - 120px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 11;
+
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1e40af;
+
+  background: rgba(255, 255, 255, 0.6);
+  padding: 0.3rem 1.2rem;
+  border-radius: 9999px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* POPUP OVERLAY */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.popup-overlay.hidden {
+  display: none;
+}
+
+/* POPUP BOX */
+.popup-box {
+  background: #fff;
+  border-radius: 1.5rem;
+  padding: 2rem 2.5rem;
+  text-align: center;
+  width: 340px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+  animation: pop 0.4s ease;
+}
+
+/* ANIMASI */
+@keyframes pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.popup-icon {
+  font-size: 3.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.popup-text {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #1e40af;
+  margin-bottom: 1.2rem;
+}
+
+.popup-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.popup-btn:hover {
+  background: #1d4ed8;
+}
+
+* {
+  -webkit-user-select: none; /* Chrome, Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE/Edge lama */
+  user-select: none;
+}
+
+.popup-image {
+  width: 180px;
+  margin-bottom: 0.8rem;
+}
+
+.fullscreen-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+
+  background: rgba(255, 255, 255, 0.85);
+  border: none;
+  border-radius: 9999px;
+  padding: 0.6rem 0.8rem;
+
+  font-size: 1.4rem;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+
+  transition: transform 0.15s ease, background 0.2s;
+}
+
+.fullscreen-btn:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+
+
+  </style>
+</head>
+<body>
+    <button id="fullscreen-btn" class="fullscreen-btn" title="Fullscreen">
+  ⛶
+</button>
+
+<div class="game-area">
+
+  <div class="wheel-container left">
+    <div id="problem-wheel" class="wheel"></div>
+    <div class="center-face"></div>
+  </div>
+
+  <div class="wheel-container right draggable" id="answer-wheel-container">
+    <div id="answer-wheel" class="wheel"></div>
+    <div class="center-face"></div>
+  </div>
+
+  <div id="problem-label" class="problem-label">
+  Pilih Soal
+</div>
+
+  <div class="center-box">
+    <div id="equation" style="
+      font-size: 2.4rem;
+      font-weight: bold;
+      color: #1e40af;
+      letter-spacing: 0.05em;
+    ">
+=
+    </div>
+  </div>
+
+<div class="center-controls">
+  <button id="spin-btn" class="spin-btn">
+    Spin Roda Soal
+  </button>
+
+  <button id="check-btn" class="spin-btn" style="background:#16a34a;">
+    Cek Jawaban
+  </button>
+</div>
+
+
+</div>
+
+<!-- POPUP FEEDBACK -->
+<div id="popup-overlay" class="popup-overlay hidden">
+  <div id="popup-box" class="popup-box">
+    <div id="popup-icon" class="popup-icon"></div>
+    <div id="popup-text" class="popup-text"></div>
+    <button onclick="closePopup()" class="popup-btn">Oke 👍</button>
+  </div>
+</div>
+
+
+  <script>
+    // Data
+  /* =========================
+   AUTO GENERATOR SOAL (20)
+   REFRESH = SOAL BERUBAH
+   ========================= */
+
+const problems = [];
+const answers = [];
+
+const usedAnswers = new Set();
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+while (problems.length < 12) {
+  const isAddition = Math.random() > 0.5;
+
+  let a, b, result;
+
+  if (isAddition) {
+    a = rand(1, 19);
+    b = rand(1, 19);
+    result = a + b;
+
+    if (result > 20) continue;
+  } else {
+    a = rand(2, 20);     // ⬅️ mulai dari 2
+    b = rand(1, a - 1);  // ⬅️ hasil pasti ≥ 1
+    result = a - b;
+  }
+
+  if (result === 0) continue;
+
+  // 🔒 Pastikan jawaban unik
+  if (usedAnswers.has(result)) continue;
+
+  usedAnswers.add(result);
+
+  problems.push({
+    problem: `${a} ${isAddition ? "+" : "-"} ${b}`,
+    correctAnswer: result
+  });
+
+  answers.push(String(result));
+}
+
+
+// Optional debug
+console.log("SOAL:", problems);
+console.log("JAWABAN:", answers);
+
+
+const colors = [
+  // Merah & Pink
+  "#FF6B6B", "#EF476F", "#F72585", "#FF4D6D",
+
+  // Oranye & Kuning
+  "#FF9E00", "#FFD166", "#FCA311", "#FFBE0B",
+
+  // Hijau
+  "#06D6A0", "#2EC4B6", "#4CAF50", "#52B788",
+
+  // Biru Muda
+  "#4ECDC4", "#48CAE4", "#3A86FF", "#00B4D8",
+
+  // Biru Tua
+  "#118AB2", "#1E6091", "#023E8A", "#073B4C",
+
+  // Ungu
+  "#6A4C93", "#8338EC", "#9D4EDD", "#5A189A"
+];
+
+
+    // State
+    let problemRotation = 0;
+    let answerRotation = 0;
+    let currentProblem = null;
+    let isDragging = false;
+    let initialMouseX = 0;
+    let initialRotation = 0;
+    let hasDragged = false;
+    let totalProblemRotation = 0;
+
+
+    // DOM Elements
+    const problemWheelEl = document.getElementById('problem-wheel');
+    const answerWheelEl = document.getElementById('answer-wheel');
+    const equationEl = document.getElementById('equation');
+    const feedbackEl = document.getElementById('feedback');
+    const spinBtn = document.getElementById('spin-btn');
+    const answerWheelContainer = document.getElementById('answer-wheel-container');
+    const problemLabelEl = document.getElementById('problem-label');
+
+    // Initialize wheels
+function createWheel(wheelEl, items, isAnswer = false) {
+  wheelEl.innerHTML = '';
+  items.forEach((item, index) => {
+    const segment = document.createElement('div');
+    segment.className = 'segment';
+
+const text = document.createElement('span');
+text.textContent = isAnswer ? item : item.problem;
+
+// 🔥 FIX FINAL: teks jawaban dibalik 180° supaya menghadap ke center
+if (isAnswer) {
+  text.style.transform = 'rotate(180deg)';
+}
+
+segment.appendChild(text);
+
+    segment.style.backgroundColor = getRandomColor();
+
+    const angle = isAnswer
+      ? -30 * index   // roda kanan arah kebalik
+      : 30 * index;
+
+    segment.style.transform =
+      `translate(-50%, -50%) rotate(${angle}deg) translateX(200px)`;
+
+    segment.style.zIndex = 12 - index;
+    wheelEl.appendChild(segment);
+  });
+}
+
+
+    createWheel(problemWheelEl, problems);
+    createWheel(answerWheelEl, answers, true);
+
+    answerRotation = -180;
+answerWheelEl.style.transform =
+  `translate(-50%, -50%) rotate(${answerRotation}deg)`;
+    // Spin problem wheel
+
+function spinProblemWheel() {
+  const index = Math.floor(Math.random() * 12);
+
+  // 🔥 SELALU TAMBAH PUTARAN BARU
+  const extraSpin = 360 * 10; // 10 putaran penuh
+  const targetRotation = -30 * index;
+
+  totalProblemRotation += extraSpin + targetRotation;
+
+  problemWheelEl.style.transition =
+    'transform 7s cubic-bezier(0.1, 0.9, 0.2, 1)';
+
+  problemWheelEl.style.transform =
+    `translate(-50%, -50%) rotate(${totalProblemRotation}deg)`;
+
+  // Update soal setelah animasi selesai
+  setTimeout(() => {
+    currentProblem = problems[index];
+    problemLabelEl.textContent = currentProblem.problem;
+    problemWheelEl.style.transition = 'none';
+  }, 7000);
+}
+
+
+function updateEquation() {
+  if (!currentProblem) {
+    equationEl.textContent = '=';
+    return;
+  }
+
+}
+
+
+function getCenterAnswer() {
+  const normalized = ((answerRotation % 360) + 360) % 360;
+
+  // 🔥 FIX FINAL: titik baca di KIRI (180°)
+  const index = Math.round((normalized - 180 + 360) / 30) % 12;
+
+  return answers[index];
+}
+
+
+function getRandomColor() {
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
+
+
+    // Check answer
+function checkAnswer() {
+  if (!currentProblem) return;
+
+  const selectedAnswer = parseInt(getCenterAnswer());
+  const correct = currentProblem.correctAnswer;
+
+  const overlay = document.getElementById('popup-overlay');
+  const icon = document.getElementById('popup-icon');
+  const text = document.getElementById('popup-text');
+
+if (selectedAnswer === correct) {
+  text.innerHTML = `
+    <img src="img/benar.gif" class="popup-image" alt="Benar">
+    <div>
+      <b>BENAR!</b><br>
+      Keren banget 😍<br>
+      Yuk lanjut soal berikutnya!
+    </div>
+  `;
+} else {
+  text.innerHTML = `
+    <img src="img/salah.png" class="popup-image" alt="Salah">
+    <div>
+      Hampir benar!<br>
+      Coba putar lagi ya 💪
+    </div>
+  `;
+}
+
+
+  overlay.classList.remove('hidden');
+}
+
+function closePopup() {
+  document.getElementById('popup-overlay').classList.add('hidden');
+}
+
+
+    function snapToNearestAnswer() {
+  const snapped =
+    Math.round(answerRotation / 30) * 30;
+
+  answerRotation = snapped;
+
+  answerWheelEl.style.transition =
+    'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+
+  answerWheelEl.style.transform =
+    `translate(-50%, -50%) rotate(${answerRotation}deg)`;
+
+  updateEquation();
+
+setTimeout(() => {
+  answerWheelEl.style.transition = 'none';
+}, 600);
+
+}
+
+const checkBtn = document.getElementById('check-btn');
+
+checkBtn.addEventListener('click', () => {
+  if (!currentProblem) {
+    alert("Pilih soal dulu ya 😊");
+    return;
+  }
+  checkAnswer();
+});
+
+
+
+    // Drag logic for answer wheel
+    answerWheelContainer.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      isDragging = true;
+      initialMouseX = e.clientX;
+      initialRotation = answerRotation;
+      answerWheelContainer.classList.add('draggable');
+    });
+
+window.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+
+  const deltaX = e.clientX - initialMouseX;
+
+  // Lebih responsif
+  answerRotation = initialRotation - deltaX * 1.1;
+
+  answerWheelEl.style.transform =
+    `translate(-50%, -50%) rotate(${answerRotation}deg)`;
+
+  updateEquation();
+});
+
+
+window.addEventListener('mouseup', () => {
+  if (!isDragging) return;
+
+  isDragging = false;
+  snapToNearestAnswer();
+  answerWheelContainer.classList.remove('draggable');
+});
+
+
+answerWheelContainer.addEventListener('mouseleave', () => {
+  if (isDragging) {
+    isDragging = false;
+    snapToNearestAnswer(); // ⬅️ cuma snap, TIDAK cek jawaban
+    answerWheelContainer.classList.remove('draggable');
+  }
+});
+
+
+    // Spin button
+    spinBtn.addEventListener('click', spinProblemWheel);
+
+    // Initial state
+    updateEquation();
+
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+
+fullscreenBtn.addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+    fullscreenBtn.textContent = "⛶"; // exit icon optional
+  } else {
+    document.exitFullscreen();
+    fullscreenBtn.textContent = "⛶";
+  }
+});
+
+  </script>
+</body>
+</html>
